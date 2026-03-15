@@ -148,6 +148,13 @@
   .mbti-card.ST .mbti-code { color:#2bb58a; }
   .mbti-card.SF .mbti-code { color:#f07840; }
   .mbti-nickname { font-size:11px; color:var(--muted); font-weight:500; }
+  .fav-btn {
+    position:absolute; top:8px; right:10px;
+    background:none; border:none; font-size:17px;
+    cursor:pointer; color:#b0b8cc; padding:2px;
+    line-height:1; transition:all .2s; z-index:2;
+  }
+  .fav-btn:hover { transform:scale(1.25); }
 
   /* ── MODAL ── */
   .overlay {
@@ -319,17 +326,35 @@
   /* Responsive */
   @media(max-width:640px){
     .topbar { padding:10px 20px; }
-    .mbti-grid { grid-template-columns:repeat(2,1fr); }
-    .tab-content { padding:18px 20px 28px; }
-    .modal-header { padding:22px 20px 18px; }
-    .tab-nav { padding:10px 20px 0; }
-    .modal-title { font-size:36px; }
-    .two-col, .clue-grid, .dialog-pair { grid-template-columns:1fr; }
-    header { padding:44px 24px 40px; }
+    .mbti-grid { grid-template-columns:repeat(2,1fr); gap:8px; }
+    .tab-content { padding:16px 16px 24px; }
+    .modal-header { padding:20px 16px 16px; }
+    .tab-nav { padding:10px 16px 0; }
+    .modal-title { font-size:32px; }
+    .two-col, .clue-grid, .dialog-pair, .sub-mini-card+.sub-mini-card { grid-template-columns:1fr; }
+    header { padding:40px 20px 36px; }
     .guide-cards-grid { grid-template-columns:1fr; }
     .warn-grid { grid-template-columns:1fr; }
-    .guide-tabs-wrap { padding:14px 14px 10px; }
-    .guide-tab-btn { font-size:11px; padding:7px 13px; }
+    .guide-tabs-wrap { padding:12px 12px 10px; }
+    .guide-tab-btn { font-size:11px; padding:7px 12px; }
+    .guide-section { padding:0 16px; }
+    .grid-wrap { padding:0 16px; }
+    .tab-content { padding:14px 14px 20px; }
+    .point-card { padding:16px; }
+    .guide-card { padding:16px 16px 14px; }
+    .inner-card { padding:16px; }
+    .example-box { padding:12px 14px; }
+    .sub-panel-header { padding:14px 16px; }
+    .sub-panel-body { padding:16px; }
+    .dialog-pair { grid-template-columns:1fr; }
+    .example-text { font-size:13px; }
+    .guide-list li { font-size:13px; }
+    .section-text { font-size:13px; }
+    .onboard-box { padding:32px 24px 28px; margin:16px; }
+    .sub-tab-nav { padding:10px 12px; gap:5px; }
+    .sub-tab-btn { font-size:11px; padding:6px 12px; }
+    .mbti-card { padding:18px 12px 14px; }
+    .mbti-code { font-size:18px; }
   }
 
   /* ── COUNSELING GUIDE SECTION ── */
@@ -657,6 +682,49 @@
     letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px;
   }
 
+  /* ── ONBOARDING ── */
+  .onboard-screen {
+    position:fixed; inset:0; z-index:9998;
+    background:linear-gradient(135deg,#eef2ff 0%,#f5f0ff 50%,#e8f9f5 100%);
+    display:none; align-items:center; justify-content:center;
+    flex-direction:column;
+  }
+  .onboard-screen.active { display:flex; }
+  .onboard-box {
+    background:#fff; border-radius:24px; border:1.5px solid #e0e6f8;
+    padding:44px 40px 40px; width:100%; max-width:420px;
+    box-shadow:0 20px 60px rgba(79,126,248,0.15); text-align:center;
+  }
+  .onboard-emoji { font-size:48px; margin-bottom:16px; }
+  .onboard-title { font-size:20px; font-weight:900; color:#1a2340; margin-bottom:8px; }
+  .onboard-sub { font-size:14px; color:#8892b0; line-height:1.7; margin-bottom:28px; }
+  .onboard-options { display:grid; gap:10px; }
+  .onboard-opt {
+    border:1.5px solid #e0e6f8; border-radius:14px; padding:16px 20px;
+    cursor:pointer; text-align:left; background:#f8f9fd; transition:all .2s;
+    display:flex; align-items:center; gap:14px;
+  }
+  .onboard-opt:hover { border-color:#4f7ef8; background:#fff; transform:translateY(-2px); box-shadow:0 6px 20px rgba(79,126,248,.12); }
+  .onboard-opt-icon { font-size:26px; flex-shrink:0; }
+  .onboard-opt-label { font-size:14px; font-weight:700; color:#1a2340; }
+  .onboard-opt-desc { font-size:12px; color:#8892b0; margin-top:2px; }
+  .onboard-skip { margin-top:16px; font-size:12px; color:#b0b8cc; cursor:pointer; text-decoration:underline; }
+  .onboard-skip:hover { color:#8892b0; }
+  .recommend-banner {
+    background:linear-gradient(135deg,#4f7ef8,#7b5fe0);
+    border-radius:14px; padding:14px 18px; margin-bottom:18px;
+    display:none; align-items:center; gap:12px;
+  }
+  .recommend-banner.show { display:flex; }
+  .recommend-banner-text { font-size:13px; color:#fff; line-height:1.6; flex:1; }
+  .recommend-banner-text strong { font-size:14px; display:block; margin-bottom:2px; }
+  .recommend-reselect {
+    flex-shrink:0; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4);
+    color:#fff; border-radius:20px; padding:6px 14px; font-size:12px; font-weight:700;
+    cursor:pointer; white-space:nowrap; transition:all .2s; font-family:'Noto Sans KR',sans-serif;
+  }
+  .recommend-reselect:hover { background:rgba(255,255,255,0.35); }
+
   .lock-screen {
     position:fixed; inset:0; z-index:9999;
     background:linear-gradient(135deg,#eef2ff 0%,#f5f0ff 50%,#e8f9f5 100%);
@@ -777,6 +845,39 @@
   </div>
 </div>
 
+<!-- ── ONBOARDING (독립 레이어) ── -->
+<div class="onboard-screen" id="onboardScreen">
+  <div class="onboard-box">
+    <div class="onboard-emoji">🌱</div>
+    <div class="onboard-title">반갑습니다!</div>
+    <div class="onboard-sub">상담 경험이 얼마나 되세요?<br>맞춤 가이드를 추천해드릴게요 😊</div>
+    <div class="onboard-options">
+      <div class="onboard-opt" onclick="finishOnboard('beginner')">
+        <div class="onboard-opt-icon">🌱</div>
+        <div>
+          <div class="onboard-opt-label">처음이에요</div>
+          <div class="onboard-opt-desc">상담이 처음이거나 아직 익숙하지 않아요</div>
+        </div>
+      </div>
+      <div class="onboard-opt" onclick="finishOnboard('mid')">
+        <div class="onboard-opt-icon">🌿</div>
+        <div>
+          <div class="onboard-opt-label">몇 번 해봤어요</div>
+          <div class="onboard-opt-desc">상담 경험은 있지만 더 잘하고 싶어요</div>
+        </div>
+      </div>
+      <div class="onboard-opt" onclick="finishOnboard('pro')">
+        <div class="onboard-opt-icon">🌳</div>
+        <div>
+          <div class="onboard-opt-label">어느 정도 익숙해요</div>
+          <div class="onboard-opt-desc">상담이 익숙하고 심화 내용이 궁금해요</div>
+        </div>
+      </div>
+    </div>
+    <div class="onboard-skip" onclick="finishOnboard('skip')">건너뛰기</div>
+  </div>
+</div>
+
 <!-- ── MAIN CONTENT ── -->
 <div class="main-content" id="mainContent">
 
@@ -788,7 +889,10 @@
       <div class="topbar-sub">WINNERS WITHUS</div>
     </div>
   </div>
-  <div style="font-size:11px;color:rgba(255,255,255,.6);">인간 이해 교육 자료</div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div style="font-size:11px;color:rgba(255,255,255,.6);">인간 이해 교육 자료</div>
+    <button onclick="reopenOnboard()" style="font-size:11px;color:rgba(255,255,255,.8);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:5px 12px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-weight:600;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">경험 다시 선택 ↩</button>
+  </div>
 </div>
 
 <header>
@@ -828,15 +932,25 @@
     <div class="guide-section-label">Winners WithUs 상담 가이드</div>
   </div>
 
+  <!-- 추천 배너 -->
+  <div class="recommend-banner" id="recommendBanner">
+    <div style="font-size:24px;flex-shrink:0;">💡</div>
+    <div class="recommend-banner-text">
+      <strong id="recommendTitle">추천 시작 탭</strong>
+      <span id="recommendDesc"></span>
+    </div>
+    <button class="recommend-reselect" onclick="reopenOnboard()">다시 선택 ↩</button>
+  </div>
+
   <div class="guide-tabs-wrap">
     <div class="guide-tabs-row-label">📚 상담 가이드</div>
     <div class="guide-tabs-row">
-      <button class="guide-tab-btn active" onclick="switchGuideTab('info',event)">① 정보파악</button>
-      <button class="guide-tab-btn" onclick="switchGuideTab('point',event)">② 상담 포인트 잡기</button>
-      <button class="guide-tab-btn" onclick="switchGuideTab('inner',event)">③ 내면 변화의 필요성</button>
-      <button class="guide-tab-btn" onclick="switchGuideTab('mbticheck',event)">④ MBTI 파악 질문</button>
-      <button class="guide-tab-btn" onclick="switchGuideTab('mbtiall',event)">⑤ 성향·기질별 상담 예시</button>
-      <button class="guide-tab-btn scroll-btn" onclick="document.querySelector('.grid-wrap').scrollIntoView({behavior:'smooth'})">⑥ MBTI 유형별 완전 가이드 ↓</button>
+      <button class="guide-tab-btn active" onclick="switchGuideTab('info',event)">🔍 정보파악</button>
+      <button class="guide-tab-btn" onclick="switchGuideTab('point',event)">🎯 상담 포인트</button>
+      <button class="guide-tab-btn" onclick="switchGuideTab('inner',event)">💡 내면 변화</button>
+      <button class="guide-tab-btn" onclick="switchGuideTab('mbticheck',event)">🧩 MBTI 파악</button>
+      <button class="guide-tab-btn" onclick="switchGuideTab('mbtiall',event)">💬 성향·기질별 예시</button>
+      <button class="guide-tab-btn scroll-btn" onclick="document.querySelector('.grid-wrap').scrollIntoView({behavior:'smooth'})">📖 유형별 가이드 ↓</button>
     </div>
     <div class="guide-tabs-row-label" style="margin-top:10px;">🛠️ 상담 도구</div>
     <div class="guide-tabs-row">
@@ -2872,7 +2986,10 @@ ORDER.forEach(code => {
   const d = DATA[code];
   const el = document.createElement('div');
   el.className = `mbti-card ${d.type}`;
-  el.innerHTML = `<div class="mbti-code">${code}</div><div class="mbti-nickname">${d.nickname}</div>`;
+  el.innerHTML = `
+    <button class="fav-btn" data-code="${code}" onclick="event.stopPropagation();toggleFav('${code}')" title="즐겨찾기">☆</button>
+    <div class="mbti-code">${code}</div>
+    <div class="mbti-nickname">${d.nickname}</div>`;
   el.onclick = () => openModal(code);
   grid.appendChild(el);
 });
@@ -2892,12 +3009,13 @@ function openModal(code) {
   document.getElementById('mTitle').style.color = tc.c;
   document.getElementById('mSub').textContent = `"${d.nickname}" — ${d.tagline}`;
 
-  const tabs = ['개요 & 성격','유형 파악법','대화 전략','상담 가이드','실전 대화 예시'];
+  const tabs = ['⚡ 한 장 요약','📋 개요 & 성격','🔍 유형 파악법','💬 대화 전략','🩺 상담 가이드','🎭 실전 대화'];
   const nav = document.getElementById('tabNav');
   nav.innerHTML = tabs.map((t,i) => `<button class="tab-btn ${i===0?'active':''}" onclick="switchTab(${i})">${t}</button>`).join('');
 
   const contents = document.getElementById('tabContents');
   contents.innerHTML = '';
+  contents.appendChild(buildTabSummary(d, tc));
   contents.appendChild(buildTab0(d));
   contents.appendChild(buildTab1(d));
   contents.appendChild(buildTab2(d));
@@ -2907,6 +3025,38 @@ function openModal(code) {
   currentTab = 0;
   document.getElementById('overlay').classList.add('active');
   document.body.style.overflow = 'hidden';
+}
+
+function buildTabSummary(d, tc) {
+  const div = document.createElement('div');
+  div.className = 'tab-content active';
+  div.innerHTML = `
+    <div style="background:linear-gradient(135deg,${tc.c}18,${tc.c}08);border:1.5px solid ${tc.c}40;border-radius:14px;padding:18px 20px;margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:800;color:${tc.c};letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">한 장 요약 · ${d.name} ${d.nickname}</div>
+      <div style="font-size:13.5px;line-height:1.85;color:var(--text2);">${d.desc}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div style="background:#f0fdf8;border:1.5px solid rgba(43,181,138,.25);border-radius:12px;padding:14px 16px;">
+        <div style="font-size:10px;font-weight:800;color:#1a7a5a;letter-spacing:2px;margin-bottom:8px;">✦ 이렇게 말하면 통해요</div>
+        ${d.likeWords.slice(0,3).map(w=>`<div style="font-size:12.5px;color:#1a2340;padding:4px 0;border-bottom:1px solid rgba(43,181,138,.15);">"${w}"</div>`).join('')}
+      </div>
+      <div style="background:#fff5f5;border:1.5px solid rgba(248,107,107,.25);border-radius:12px;padding:14px 16px;">
+        <div style="font-size:10px;font-weight:800;color:#c03030;letter-spacing:2px;margin-bottom:8px;">✕ 이 말은 하지 마세요</div>
+        ${d.dislikeWords.slice(0,3).map(w=>`<div style="font-size:12.5px;color:#1a2340;padding:4px 0;border-bottom:1px solid rgba(248,107,107,.15);">"${w}"</div>`).join('')}
+      </div>
+    </div>
+    <div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:800;color:var(--accent1);letter-spacing:2px;margin-bottom:10px;">💡 핵심 접근법 TOP 3</div>
+      ${d.approach.slice(0,3).map(a=>`<div style="font-size:13px;color:var(--text2);padding:5px 0 5px 16px;position:relative;border-bottom:1px solid var(--border);">
+        <span style="position:absolute;left:0;color:var(--accent1);font-weight:800;">›</span>${a.title} — <span style="color:var(--muted);">${a.body.substring(0,40)}...</span>
+      </div>`).join('')}
+    </div>
+    <div style="background:#fff8f4;border:1.5px solid rgba(240,120,64,.25);border-left:3px solid #f07840;border-radius:12px;padding:14px 16px;">
+      <div style="font-size:10px;font-weight:800;color:#d05818;letter-spacing:2px;margin-bottom:6px;">⚠️ 반드시 주의</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.75;">${d.caution}</div>
+    </div>
+  `;
+  return div;
 }
 
 function switchTab(i) {
@@ -2933,7 +3083,7 @@ function buildTab0(d) {
       <div class="section-text">${d.desc}</div>
     </div>
     <div class="section">
-      <div class="section-label">주요 애니어그램</div>
+      <div class="section-label">주요 애니어그램 <span style="font-size:10px;background:#f0f5ff;color:#4f7ef8;border:1px solid rgba(79,126,248,.3);border-radius:20px;padding:2px 8px;font-weight:700;letter-spacing:1px;vertical-align:middle;">심화</span></div>
       <div class="ennea-row">${d.enneagram.map(n=>`<div class="ennea-badge">${n}</div>`).join('')}</div>
       <div class="section-text">${d.enneagramNote}</div>
     </div>
@@ -3077,11 +3227,63 @@ function switchSubTab(id, btn) {
   if(target) target.classList.add('active');
 }
 
+/* ── ONBOARDING ── */
+function reopenOnboard() {
+  document.getElementById('onboardScreen').classList.add('active');
+}
+
+function finishOnboard(level) {
+  document.getElementById('onboardScreen').classList.remove('active');
+  document.getElementById('mainContent').classList.add('unlocked');
+  var banner = document.getElementById('recommendBanner');
+  var title = document.getElementById('recommendTitle');
+  var desc = document.getElementById('recommendDesc');
+  if(level === 'beginner') {
+    banner.classList.add('show');
+    title.textContent = '🌱 처음이시군요! 이 순서로 시작해보세요';
+    desc.textContent = '🚨 이것만은 꼭! → 🔍 정보파악 → 🎯 상담 포인트 순서를 추천해요';
+    setTimeout(function(){
+      var btn = document.querySelector('[onclick*="caution"]');
+      if(btn) btn.click();
+    }, 300);
+  } else if(level === 'mid') {
+    banner.classList.add('show');
+    title.textContent = '🌿 경험이 있으시군요! 이걸 먼저 보세요';
+    desc.textContent = '💬 성향·기질별 예시와 🧩 MBTI 파악 탭을 중심으로 활용해보세요';
+  } else if(level === 'pro') {
+    banner.classList.add('show');
+    title.textContent = '🌳 숙련자시군요! 심화 내용도 확인해보세요';
+    desc.textContent = '📖 유형별 가이드에서 애니어그램(심화) 연계 내용을 꼭 확인하세요';
+  }
+}
+
+/* ── FAVORITES ── */
+var favorites = JSON.parse(localStorage.getItem('ww_favorites') || '[]');
+
+function toggleFav(code) {
+  var idx = favorites.indexOf(code);
+  if(idx === -1) {
+    favorites.push(code);
+  } else {
+    favorites.splice(idx, 1);
+  }
+  localStorage.setItem('ww_favorites', JSON.stringify(favorites));
+  updateFavButtons();
+}
+
+function updateFavButtons() {
+  document.querySelectorAll('.fav-btn').forEach(function(btn) {
+    var code = btn.dataset.code;
+    btn.textContent = favorites.indexOf(code) !== -1 ? '★' : '☆';
+    btn.style.color = favorites.indexOf(code) !== -1 ? '#f8c400' : '#b0b8cc';
+  });
+}
+
 function tryUnlock() {
   const val = document.getElementById('pwInput').value;
   if (val === 'qnrcjddl') {
     document.getElementById('lockScreen').style.display = 'none';
-    document.getElementById('mainContent').classList.add('unlocked');
+    document.getElementById('onboardScreen').classList.add('active');
   } else {
     const input = document.getElementById('pwInput');
     const err = document.getElementById('lockError');
@@ -3155,6 +3357,11 @@ function filterAcc(type, btn) {
   var visible = Array.from(items).filter(function(i){ return i.style.display !== 'none'; });
   if(visible.length === 1) visible[0].classList.add('open');
 }
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded', function() {
+  updateFavButtons();
+});
 </script>
 
 </body>

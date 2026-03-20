@@ -735,6 +735,7 @@
     display:flex; align-items:center; justify-content:center;
     flex-direction:column;
   }
+  .lock-screen.hidden { display:none !important; }
   .lock-screen::before {
     content:'';
     position:absolute; inset:0;
@@ -843,7 +844,6 @@
     .mbti-name      { font-size:13px !important; }
     .tab-btn        { font-size:13px !important; padding:8px 10px !important; }
     .modal-body     { padding:16px !important; }
-    #quickSearchInput { font-size:15px !important; padding:13px 16px 13px 44px !important; }
     .search-result-item { font-size:15px !important; padding:13px 16px !important; }
     .onboard-title  { font-size:22px !important; }
     .onboard-sub    { font-size:16px !important; }
@@ -864,6 +864,55 @@
     .modal-content { padding:16px !important; }
     .tab-content { font-size:16px !important; }
   }
+
+
+  /* ── MODAL OVERLAY ── */
+  .modal-overlay {
+    display:none;
+    position:fixed; inset:0; z-index:1000;
+    background:rgba(10,15,40,0.6);
+    backdrop-filter:blur(4px);
+    align-items:center; justify-content:center;
+    padding:16px;
+    overflow-y:auto;
+  }
+  .modal-overlay.active {
+    display:flex;
+  }
+  .modal-content {
+    background:var(--surface);
+    border-radius:20px;
+    width:100%; max-width:720px;
+    max-height:90vh;
+    overflow-y:auto;
+    position:relative;
+    box-shadow:0 20px 60px rgba(0,0,0,0.25);
+    animation:modalIn .25s ease;
+  }
+  @keyframes modalIn {
+    from { opacity:0; transform:translateY(20px) scale(0.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
+  }
+  .modal-close {
+    position:absolute; top:14px; right:16px; z-index:10;
+    background:none; border:none; font-size:20px;
+    color:var(--muted); cursor:pointer; padding:4px 8px;
+    border-radius:8px; line-height:1;
+  }
+  .modal-close:hover { background:var(--border); }
+  .tab-nav {
+    display:flex; overflow-x:auto; border-bottom:1.5px solid var(--border);
+    padding:0 16px; gap:2px; flex-shrink:0;
+  }
+  .tab-btn {
+    padding:12px 14px; border:none; background:none;
+    font-size:13px; font-weight:600; color:var(--muted);
+    cursor:pointer; white-space:nowrap; border-bottom:2px solid transparent;
+    margin-bottom:-1.5px; transition:all .15s;
+  }
+  .tab-btn.active { color:var(--accent1); border-bottom-color:var(--accent1); }
+  .tab-content { display:none; padding:20px 16px; }
+  .tab-content.active { display:block; }
 
 </style>
 </head>
@@ -971,27 +1020,6 @@
      SECTION 2 — 정보파악 & 상담포인트
 ════════════════════════════════════════ -->
 
-<!-- 빠른 검색 -->
-  <div id="quickSearchWrap" style="margin:0 0 16px;position:relative;">
-    <div style="position:relative;">
-      <input id="quickSearchInput" type="text" placeholder="🔍  유형, 상황, 키워드로 빠르게 찾기  (예: INFP, 라포, 무기력, 사군자...)"
-        oninput="doQuickSearch(this.value)"
-        onfocus="document.getElementById('searchResults').style.display='block'"
-        onblur="setTimeout(function(){document.getElementById('searchResults').style.display='none'},200)"
-        style="width:100%;box-sizing:border-box;padding:12px 16px 12px 42px;border:2px solid var(--border);border-radius:14px;font-size:17px;background:var(--card);color:var(--text1);outline:none;transition:border .2s;"
-        onfocusin="this.style.borderColor='#4f7ef8'"
-        onfocusout="this.style.borderColor='var(--border)'"
-      />
-      <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;">🔍</span>
-    </div>
-    <div id="searchResults" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--card);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:999;max-height:360px;overflow-y:auto;"></div>
-  </div>
-
-
-<!-- ══════════════════════════════════════
-     SECTION — MBTI GRID
-════════════════════════════════════════ -->
-
 <div class="grid-wrap">
   <div style="text-align:center;margin-bottom:10px;">
     <div class="guide-section-label" style="display:inline-block;font-size:clamp(16px,2.5vw,22px);">① MBTI 유형별 완전 가이드</div>
@@ -1000,10 +1028,11 @@
   <div class="mbti-grid" id="mbtiGrid"></div>
 </div>
 
-<div class="overlay" id="overlay">
-  <div class="modal" id="modal">
-    <div class="modal-header">
-      <button class="close-btn" onclick="closeModal()">✕</button>
+<!-- 모달 -->
+<div class="modal-overlay" id="overlay" onclick="closeModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-header" id="modalHeader">
       <div class="modal-badge" id="mBadge"></div>
       <div class="modal-title" id="mTitle"></div>
       <div class="modal-sub" id="mSub"></div>
@@ -1014,8 +1043,7 @@
 </div>
 
 
-
-<div style="margin:28px 0 8px;border-top:2px dashed var(--border);padding-top:24px;"></div>
+<div style="height:32px;"></div>
 <div class="guide-section">
 
   <!-- 탭 네비 -->
@@ -3749,50 +3777,7 @@
           </div>
         </div>
 
-        <div class="sub-section-label">📅 1년 독서 로드맵 — 단계별로 읽는 방향이 달라져요</div>
-        <div class="stage-list" style="margin-bottom:20px;">
-          <div class="stage-item">
-            <div class="stage-num" style="background:linear-gradient(135deg,#4f7ef8,#7b5fe0);">1~3<br>개월</div>
-            <div class="stage-body">
-              <strong>나를 이해하는 단계 — "내가 이런 사람이었구나"</strong><br>
-              가볍고 얇고 공감되는 책부터 시작해요. 완독 부담 없이요.<br>
-              <em>추천 방향:</em> 에세이, 짧은 소설, 자기 이해 관련 책<br>
-              <em>상담 연결:</em> "이번 주에 읽다가 '나 얘기다' 싶었던 부분 있어요?"<br>
-              <em>목표:</em> 책을 읽는 게 어색하지 않아지는 것. 습관의 씨앗 심기.
-            </div>
-          </div>
-          <div class="stage-item">
-            <div class="stage-num" style="background:linear-gradient(135deg,#2bb58a,#3dd9a8);">4~6<br>개월</div>
-            <div class="stage-body">
-              <strong>패턴을 보는 단계 — "왜 이렇게 살았는지 보인다"</strong><br>
-              관계, 감정, 심리 관련 책으로 넘어가요. 조금 더 깊이 들어가요.<br>
-              <em>추천 방향:</em> 심리 에세이, 관계를 다룬 소설, 철학 입문서<br>
-              <em>상담 연결:</em> "책에서 읽은 것 중에 지금 내 상황이랑 연결되는 게 있어요?"<br>
-              <em>목표:</em> 책이 자기 이해의 거울이 되는 것. 패턴 발견.
-            </div>
-          </div>
-          <div class="stage-item">
-            <div class="stage-num" style="background:linear-gradient(135deg,#a066e0,#c18af8);">7~9<br>개월</div>
-            <div class="stage-body">
-              <strong>변화의지가 생기는 단계 — "바꿀 수 있겠다"</strong><br>
-              변화와 성장을 다룬 책으로 가요. 이 단계에서 책이 행동을 만들어요.<br>
-              <em>추천 방향:</em> 실천 위주 에세이, 타인의 성장 이야기, 역사 인물 관련<br>
-              <em>상담 연결:</em> "읽으면서 해보고 싶어진 게 생겼어요?"<br>
-              <em>목표:</em> 책에서 읽은 것을 삶에 하나씩 적용해보는 것.
-            </div>
-          </div>
-          <div class="stage-item">
-            <div class="stage-num" style="background:linear-gradient(135deg,#f07840,#f8a070);">10~12<br>개월</div>
-            <div class="stage-body">
-              <strong>목적성이 생기는 단계 — "내가 어떤 삶을 살고 싶은지 보인다"</strong><br>
-              삶의 의미와 방향을 다루는 책으로 마무리해요. 이 단계의 책은 깊어요.<br>
-              <em>추천 방향:</em> 인문학 고전, 철학, 의미를 다룬 깊은 책<br>
-              <em>상담 연결:</em> "1년 전의 나와 지금의 나가 다른 게 뭐예요?"<br>
-              <em>목표:</em> 책 없이도 스스로 질문하고 방향을 찾을 수 있는 힘.
-            </div>
-          </div>
-        </div>
-
+        
         <div class="sub-section-label">💬 읽기 싫다고 할 때 — 매력적으로 설득하는 법</div>
 
         <div class="alert-box info" style="margin-bottom:14px;">
@@ -4389,6 +4374,9 @@
 
   <div class="guide-divider"></div>
 </div>
+
+<!-- MBTI 그리드 + 모달 -->
+
 <script>
 
 
@@ -5446,6 +5434,7 @@ function finishOnboard(level) {
     return s;
   }
 
+  if(!banner || !title || !desc) return;
   banner.classList.add('show');
 
   if(level === 'beginner') {
@@ -5521,58 +5510,79 @@ function toggleFav(code) {
     favorites.splice(idx, 1);
   }
   localStorage.setItem('ww_favorites', JSON.stringify(favorites));
+  document.getElementById('mainContent').classList.add('unlocked');
+  document.getElementById('onboardScreen').classList.add('active');
+}
 
-/* ── QUICK SEARCH ── */
-var SEARCH_INDEX = [
-  {label:'INTJ — 전략가', kw:['intj','전략가','계획','독립'], go:function(){openModal('INTJ')}},
-  {label:'INTP — 논리술사', kw:['intp','논리','분석','철학'], go:function(){openModal('INTP')}},
-  {label:'ENTJ — 통솔자', kw:['entj','통솔','리더','목표'], go:function(){openModal('ENTJ')}},
-  {label:'ENTP — 변론가', kw:['entp','변론','토론','아이디어'], go:function(){openModal('ENTP')}},
-  {label:'INFJ — 옹호자', kw:['infj','옹호','통찰','의미'], go:function(){openModal('INFJ')}},
-  {label:'INFP — 중재자', kw:['infp','중재','감수성','이상'], go:function(){openModal('INFP')}},
-  {label:'ENFJ — 선도자', kw:['enfj','선도','공감','성장'], go:function(){openModal('ENFJ')}},
-  {label:'ENFP — 활동가', kw:['enfp','활동','열정','창의'], go:function(){openModal('ENFP')}},
-  {label:'ISTJ — 현실주의자', kw:['istj','현실','책임','원칙'], go:function(){openModal('ISTJ')}},
-  {label:'ISFJ — 수호자', kw:['isfj','수호','헌신','배려'], go:function(){openModal('ISFJ')}},
-  {label:'ESTJ — 경영자', kw:['estj','경영','체계','규칙'], go:function(){openModal('ESTJ')}},
-  {label:'ESFJ — 집정관', kw:['esfj','집정관','관계','조화'], go:function(){openModal('ESFJ')}},
-  {label:'ISTP — 장인', kw:['istp','장인','분석','실용'], go:function(){openModal('ISTP')}},
-  {label:'ISFP — 모험가', kw:['isfp','모험','감각','자유'], go:function(){openModal('ISFP')}},
-  {label:'ESTP — 사업가', kw:['estp','사업','행동','현실'], go:function(){openModal('ESTP')}},
-  {label:'ESFP — 연예인', kw:['esfp','연예인','활발','즐거움'], go:function(){openModal('ESFP')}},
-  {label:'사군자 기질검사 — 매화·난초·국화·대나무', kw:['사군자','기질','매화','난초','국화','대나무'], go:function(){goTool('tool-sagunja')}},
-  {label:'문장완성검사 SCT', kw:['sct','문장완성','투사','무의식'], go:function(){goTool('tool-sct')}},
-  {label:'애니어그램 — 9가지 유형', kw:['애니어그램','에니어그램','1번','2번','3번','4번','5번','6번','7번','8번','9번'], go:function(){goTool('tool-enneagram')}},
-  {label:'핵심감정 — 16가지 체크리스트', kw:['핵심감정','부담감','억울함','열등감','외로움','불안','무기력','허무','분노','슬픔','공포','소외','적개심','경쟁심','그리움','질투'], go:function(){goTool('tool-emotion')}},
-  {label:'라포 형성 완전 가이드', kw:['라포','rapport','신뢰','친밀','미러링'], go:function(){switchGuideTab('rapport', null)}},
-  {label:'정보파악 — 첫 상담 파악법', kw:['정보파악','첫상담','초기'], go:function(){switchGuideTab('info', null)}},
-  {label:'상담 포인트 — 상황별', kw:['상담포인트','포인트','상황'], go:function(){switchGuideTab('point', null)}},
-  {label:'내면 변화 멘트', kw:['내면변화','변화','멘트'], go:function(){switchGuideTab('inner', null)}},
-  {label:'MBTI 파악 질문법', kw:['mbti파악','파악','질문'], go:function(){switchGuideTab('mbticheck', null)}},
-  {label:'성향·기질별 예시 대화', kw:['성향','기질별','예시'], go:function(){switchGuideTab('mbtiall', null)}},
-  {label:'시작 & 마무리 멘트', kw:['시작','마무리','오프닝','클로징'], go:function(){switchGuideTab('opclose', null)}},
-  {label:'절대 하면 안 되는 말', kw:['하면안되는','금지','주의','실수'], go:function(){switchGuideTab('neverwords', null)}},
-  {label:'초보 상담자 필독', kw:['초보','필독','주의사항','처음'], go:function(){switchGuideTab('caution', null)}},
-  {label:'인문학·고전·독서 프로그램', kw:['인문학','고전','독서','책','프로그램'], go:function(){switchGuideTab('classics', null)}},
-  {label:'무기력 → 핵심감정', kw:['무기력','아무것도','하기싫'], go:function(){goTool('tool-emotion')}},
-  {label:'불안 → 핵심감정', kw:['불안','걱정','긴장'], go:function(){goTool('tool-emotion')}},
-  {label:'외로움 → 핵심감정', kw:['외롭','외로움','소외','혼자'], go:function(){goTool('tool-emotion')}},
-  {label:'분노·억울함 → 핵심감정', kw:['분노','화','억울'], go:function(){goTool('tool-emotion')}}
-];
+/* ── MISSING FUNCTIONS RESTORED ── */
+
+function togglePw(){
+  var i=document.getElementById('pwInput');
+  if(i) i.type=i.type==='password'?'text':'password';
+}
+
+function tryUnlock() {
+  var input = document.getElementById('pwInput');
+  var val = input ? input.value : '';
+  if(val === 'qnrcjddl') {
+    document.getElementById('lockScreen').classList.add('hidden');
+    document.getElementById('mainContent').classList.add('unlocked');
+    document.getElementById('onboardScreen').classList.add('active');
+  } else {
+    var err = document.getElementById('lockError') || document.getElementById('pwError');
+    if(err) { err.innerHTML = '❌ 비밀번호가 틀렸습니다.'; }
+    if(input) { input.value = ''; input.focus(); }
+  }
+}
+
+function clearError() {
+  var err = document.getElementById('lockError') || document.getElementById('pwError');
+  if(err) err.innerHTML = '';
+}
+
+function updateFavButtons() {
+  document.querySelectorAll('.fav-btn').forEach(function(btn) {
+    var code = btn.getAttribute('data-code');
+    if(!code) return;
+    btn.textContent = favorites.indexOf(code) !== -1 ? '★' : '☆';
+    btn.style.color = favorites.indexOf(code) !== -1 ? '#f8c400' : '#ccc';
+  });
+}
+
+function switchGuideTab(id, e) {
+  document.querySelectorAll('.guide-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.guide-tab-btn').forEach(function(b) {
+    b.classList.remove('active');
+    b.classList.remove('active-warn');
+  });
+  var panel = document.getElementById('gtab-' + id);
+  if(panel) panel.classList.add('active');
+  var ev = e || window.event;
+  var btn = ev && ev.target ? ev.target.closest('.guide-tab-btn') : null;
+  if(btn) {
+    if(id === 'caution') { btn.classList.add('active-warn'); }
+    else { btn.classList.add('active'); }
+  }
+}
+
+function toggleAcc(header) {
+  var item = header.closest('.acc-item');
+  if(!item) return;
+  var isOpen = item.classList.contains('open');
+  var parent = item.parentElement;
+  if(parent) {
+    parent.querySelectorAll('.acc-item.open').forEach(function(o) { o.classList.remove('open'); });
+  }
+  if(!isOpen) item.classList.add('open');
+}
 
 function goTool(subId) {
   switchGuideTab('tools', null);
   setTimeout(function(){
-    // Activate sub-panel directly without needing button reference
-    document.querySelectorAll('.sub-panel').forEach(function(p){
-      p.classList.remove('active');
-    });
-    document.querySelectorAll('.sub-tab-btn').forEach(function(b){
-      b.classList.remove('active');
-    });
+    document.querySelectorAll('.sub-panel').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelectorAll('.sub-tab-btn').forEach(function(b){ b.classList.remove('active'); });
     var panel = document.getElementById('sub-' + subId);
     if(panel) panel.classList.add('active');
-    // Also activate the matching button
     document.querySelectorAll('.sub-tab-btn').forEach(function(b){
       if(b.getAttribute('onclick') && b.getAttribute('onclick').indexOf(subId) !== -1) {
         b.classList.add('active');
@@ -5581,143 +5591,9 @@ function goTool(subId) {
   }, 250);
 }
 
-function doQuickSearch(q) {
-  var box = document.getElementById('searchResults');
-  if(!q || q.trim().length < 1) {
-    box.innerHTML = '';
-    box.style.display = 'none';
-    return;
-  }
-  box.style.display = 'block';
-  var kw = q.trim().toLowerCase();
-  var results = SEARCH_INDEX.filter(function(item) {
-    return item.label.toLowerCase().indexOf(kw) > -1 ||
-           item.kw.some(function(k){ return k.indexOf(kw) > -1; });
-  });
-  if(results.length === 0) {
-    box.innerHTML = '<div style="padding:16px;color:var(--muted);font-size:17px;text-align:center;">검색 결과가 없어요 🥲</div>';
-    return;
-  }
-  var html = '';
-  var slice = results.slice(0, 8);
-  for(var i = 0; i < slice.length; i++) {
-    html += '<div class="search-result-item" data-idx="' + i + '" style="padding:11px 16px;cursor:pointer;border-bottom:1px solid var(--border);font-size:17px;color:var(--text1);">' + slice[i].label + '</div>';
-  }
-  box.innerHTML = html;
-  box.querySelectorAll('.search-result-item').forEach(function(el) {
-    el.addEventListener('mousedown', function(ev) {
-      ev.preventDefault();
-      var idx = parseInt(this.getAttribute('data-idx'));
-      document.getElementById('quickSearchInput').value = '';
-      box.style.display = 'none';
-      slice[idx].go();
-    });
-    el.addEventListener('mouseover', function(){ this.style.background = 'var(--hover)'; });
-    el.addEventListener('mouseout', function(){ this.style.background = ''; });
-  });
-}
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModal(); });
+document.addEventListener('DOMContentLoaded', function(){ updateFavButtons(); });
 
-  updateFavButtons();
-}
-
-function updateFavButtons() {
-  document.querySelectorAll('.fav-btn').forEach(function(btn) {
-    var code = btn.dataset.code;
-    btn.textContent = favorites.indexOf(code) !== -1 ? '★' : '☆';
-    btn.style.color = favorites.indexOf(code) !== -1 ? '#f8c400' : '#b0b8cc';
-  });
-}
-
-function tryUnlock() {
-  const val = document.getElementById('pwInput').value;
-  if (val === 'qnrcjddl') {
-    document.getElementById('lockScreen').style.display = 'none';
-    document.getElementById('onboardScreen').classList.add('active');
-  } else {
-    const input = document.getElementById('pwInput');
-    const err = document.getElementById('lockError');
-    input.classList.remove('error');
-    void input.offsetWidth;
-    input.classList.add('error');
-    err.innerHTML = '❌ 비밀번호가 틀렸습니다.';
-    input.value = '';
-    input.focus();
-  }
-}
-function clearError() {
-  document.getElementById('lockError').innerHTML = '';
-  document.getElementById('pwInput').classList.remove('error');
-}
-function togglePw() {
-  const inp = document.getElementById('pwInput');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-}
-function switchGuideTab(id, e) {
-  document.querySelectorAll('.guide-panel').forEach(function(p) { p.classList.remove('active'); });
-  document.querySelectorAll('.guide-tab-btn').forEach(function(b) {
-    b.classList.remove('active');
-    b.classList.remove('active-warn');
-  });
-  var panel = document.getElementById('gtab-' + id);
-  if (panel) panel.classList.add('active');
-  var ev = e || window.event;
-  var btn = ev && ev.target ? ev.target.closest('.guide-tab-btn') : null;
-  if (btn) {
-    if (id === 'caution') {
-      btn.classList.add('active-warn');
-    } else {
-      btn.classList.add('active');
-    }
-  }
-}
-
-/* ── ACCORDION ── */
-function toggleAcc(header) {
-  var item = header.parentElement;
-  var isOpen = item.classList.contains('open');
-  // close all in same list
-  var all = document.querySelectorAll('#accList .acc-item');
-  all.forEach(function(el) { el.classList.remove('open'); });
-  if(!isOpen) item.classList.add('open');
-}
-
-function filterAcc(type, btn) {
-  // update button styles
-  document.querySelectorAll('.acc-filter-btn').forEach(function(b) {
-    b.style.background = '#f8f9fd';
-    b.style.color = '#8892b0';
-    b.style.borderColor = 'var(--border)';
-  });
-  btn.style.background = 'linear-gradient(90deg,#4f7ef8,#7b5fe0)';
-  btn.style.color = '#fff';
-  btn.style.borderColor = 'transparent';
-
-  // show/hide items
-  var items = document.querySelectorAll('#accList .acc-item');
-  items.forEach(function(item) {
-    item.classList.remove('open');
-    if(type === 'all') {
-      item.style.display = '';
-    } else {
-      item.style.display = (item.dataset.type === type) ? '' : 'none';
-    }
-  });
-  // auto-open if only one visible
-  var visible = Array.from(items).filter(function(i){ return i.style.display !== 'none'; });
-  if(visible.length === 1) visible[0].classList.add('open');
-}
-
-// ── INIT ──
-document.addEventListener('DOMContentLoaded', function() {
-  updateFavButtons();
-});
 </script>
-<footer>
-  <div class="footer-logo">🌱 Winners WithUs</div>
-  <div class="footer-sub">WINNERS WITHUS · 인간 이해 교육 자료 · 무단 복제 금지</div>
-</footer>
-
-</div><!-- /.main-content -->
-
 </body>
 </html>
